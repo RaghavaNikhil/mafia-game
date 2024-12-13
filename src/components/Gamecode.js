@@ -1,18 +1,26 @@
 import React, { useState } from 'react';
 import { Card, Button, Form } from 'react-bootstrap';
+import axios from 'axios';
 import PlayersDeck from './PlayersDeck';
 
 export default function CenteredCard() {
   const [gameCode, setGameCode] = useState('');
-  const [isGameCodeValid, setIsGameCodeValid] = useState(false); // Tracks if the game code is valid
+  const [isGameCodeValid, setIsGameCodeValid] = useState(false);
 
-  const validateCode = (e) => {
-    e.preventDefault(); // Prevent form submission reload
-    if (gameCode === '1234') {
-      console.log('Code is valid!');
-      setIsGameCodeValid(true); // Show the PlayersDeck component
-    } else {
-      console.log('Invalid code!');
+  const validateCode = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('https://portfolio-k8u2.onrender.com/api/verify-code', {
+        accessCode: gameCode
+      });
+      if (response.data.success) {
+        console.log('Code is valid!');
+        setIsGameCodeValid(true);
+      } else {
+        console.log('Invalid code!');
+      }
+    } catch (error) {
+      console.error('Error verifying code:', error);
     }
   };
 
@@ -27,15 +35,13 @@ export default function CenteredCard() {
       }}
     >
       {isGameCodeValid ? (
-        // Render PlayersDeck if the code is valid
         <PlayersDeck />
       ) : (
-        // Render the card to enter the game code if the code is not valid
         <Card
           style={{
             width: '18rem',
             textAlign: 'center',
-            transform: 'translateY(-50px)', // Moves card slightly up
+            transform: 'translateY(-50px)',
           }}
         >
           <Card.Title>Enter a game</Card.Title>
@@ -46,7 +52,7 @@ export default function CenteredCard() {
                   type="text"
                   placeholder="Enter game code"
                   value={gameCode}
-                  onChange={(e) => setGameCode(e.target.value)} // Update gameCode state
+                  onChange={(e) => setGameCode(e.target.value)}
                   style={{ textAlign: 'center' }}
                 />
               </Form.Group>
